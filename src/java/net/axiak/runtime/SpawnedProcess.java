@@ -23,10 +23,24 @@ public class SpawnedProcess extends Process {
 
     private native int execProcess(String [] cmdarray, String [] env, String chdir, String binrunner,
                                    FileDescriptor stdin_fd, FileDescriptor stdout_fd,
-                                   FileDescriptor stderr_fd) throws IndexOutOfBoundsException, IOException;
+                                   FileDescriptor stderr_fd, int redirectError) throws IndexOutOfBoundsException, IOException;
     private native int waitForProcess(int pid);
     private native void killProcess(int pid);
 
+	static class NullInputStream extends InputStream {
+		static final NullInputStream INSTANCE = new NullInputStream();
+		private NullInputStream() {
+			
+		}
+		public int read(){
+			return -1;
+		}
+		public int available() {
+			return 0;
+		}
+	}
+    
+    
     static {
         binrunner = findBinRunner(System.getProperty("posixspawn.binrunner", "binrunner"));
         try {
@@ -96,7 +110,7 @@ public class SpawnedProcess extends Process {
     }
 
 
-    public SpawnedProcess(final String [] cmdarray, final String [] envp, final File chdir) throws IOException {
+    public SpawnedProcess(final String [] cmdarray, final String [] envp, final File chdir, final boolean redirectError) throws IOException {
 
         if (binrunner == null) {
             throw new RuntimeException("Couldn't find binrunner program. Tried: " + System.getProperty("linuxfork.binrunner", "binrunner"));
@@ -123,7 +137,8 @@ public class SpawnedProcess extends Process {
                 new PrivilegedAction<Object>()  {
                     public Object run() {
                         try {
-                            pid = execProcess(cmdarray, envp, chdir.getAbsolutePath(), binrunner, stdin_fd, stdout_fd, stderr_fd);
+                        		int redirect = redirectError ? 1 : 0;
+                        		pid = execProcess(cmdarray, envp, chdir.getAbsolutePath(), binrunner, stdin_fd, stdout_fd, stderr_fd, redirect);
                         } catch (IOException e) {
                             gate.setException(e);
                             gate.exit();
@@ -132,7 +147,7 @@ public class SpawnedProcess extends Process {
                         stdin = new BufferedOutputStream(new FileOutputStream(stdin_fd));
                         stdout = new BufferedInputStream(new FileInputStream(stdout_fd));
                         stderr = new FileInputStream(stderr_fd);
-
+                       
                         Thread t = new Thread("process reaper") {
                             public void run() {
                                 gate.exit();

@@ -35,7 +35,7 @@ static void closeSafely(int fd);
  */
 JNIEXPORT jint JNICALL Java_net_axiak_runtime_SpawnedProcess_execProcess
 (JNIEnv * env, jclass clazz, jobjectArray cmdarray, jobjectArray envp, jstring chdir,
- jstring jbinrunner, jobject stdin_fd, jobject stdout_fd, jobject stderr_fd)
+ jstring jbinrunner, jobject stdin_fd, jobject stdout_fd, jobject stderr_fd, jint redirect_error)
 {
     int cpid = -1, length, i, total_buffer_size = 0;
     jboolean iscopy;
@@ -45,6 +45,7 @@ JNIEXPORT jint JNICALL Java_net_axiak_runtime_SpawnedProcess_execProcess
     jclass cls;
     char *path;
     int fds[3] = {1, 0, 2};
+    int fdsOldError = -1;
     int pipe_fd1[2], pipe_fd2[2], pipe_fd3[2];
     jobjectArray fdResult;
     pipe_fd1[0] = pipe_fd1[1] = pipe_fd2[0] = pipe_fd2[1] = pipe_fd3[0] = pipe_fd3[1] = -1;
@@ -88,6 +89,11 @@ JNIEXPORT jint JNICALL Java_net_axiak_runtime_SpawnedProcess_execProcess
     fds[0] = pipe_fd1[0];
     fds[1] = pipe_fd2[1];
     fds[2] = pipe_fd3[1];
+
+    if(redirect_error == 1) {
+    	fdsOldError = pipe_fd3[1];
+    	fds[2] = pipe_fd2[1];
+    }
 
     /* Get the cwd */
     tmp = (char *)(*env)->GetStringUTFChars(env, chdir, &iscopy);
@@ -150,6 +156,7 @@ JNIEXPORT jint JNICALL Java_net_axiak_runtime_SpawnedProcess_execProcess
     closeSafely(pipe_fd1[0]);
     closeSafely(pipe_fd2[1]);
     closeSafely(pipe_fd3[1]);
+    closeSafely(fdsOldError);
 
     /* Here we make sure we are good memory citizens. */
     freePargv(prepended_argv);

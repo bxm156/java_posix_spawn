@@ -14,28 +14,44 @@ public class SpawnRuntime {
         linuxSpawnLoaded = SpawnedProcess.isLibraryLoaded();
     }
 
-    public Process exec(String [] cmdarray, String [] envp, File chdir) throws IOException {
+    public Process exec(String [] cmdarray, String [] envp, File chdir, boolean redirectError) throws IOException {
         if (linuxSpawnLoaded) {
-            return new SpawnedProcess(cmdarray, envp, chdir);
+            return new SpawnedProcess(cmdarray, envp, chdir,redirectError);
         } else {
 	        return runtime.exec(cmdarray, envp, chdir);
         }
     }
 
-    public Process exec(String [] cmdarray, String [] envp) throws IOException {
-        return exec(cmdarray, envp, new File("."));
+    
+    public Process exec(String [] cmdarray, String [] envp, File chdir) throws IOException {
+    	return exec(cmdarray, envp, chdir, false);
+    }
+
+    public Process exec(String [] cmdarray, String [] envp, boolean redirectError) throws IOException {
+        return exec(cmdarray, envp, new File("."), redirectError);
     }
 
     public Process exec(String [] cmdarray) throws IOException {
-        return exec(cmdarray, null);
+        return exec(cmdarray, null, false);
+    }
+    
+    public Process exec(String [] cmdarray, boolean redirectError) throws IOException {
+        return exec(cmdarray, null, redirectError);
     }
 
     public Process exec(String command) throws IOException {
-        String[] cmdarray = {command};
         return exec(command, null, new File("."));
+    }
+    
+    public Process exec(String command, boolean redirectError) throws IOException {
+        return exec(command, null, new File("."), redirectError);
     }
 
     public Process exec(String command, String[] envp, File dir) throws IOException {
+       return exec(command, envp, dir, false);
+    }
+
+    public Process exec(String command, String[] envp, File dir, boolean redirectError) throws IOException {
         if (command.length() == 0) {
             throw new IllegalArgumentException("Empty command");
         }
@@ -44,7 +60,7 @@ public class SpawnRuntime {
         for (int i = 0; st.hasMoreTokens(); i++) {
             cmdarray[i] = st.nextToken();
         }
-        return exec(cmdarray, envp, dir);
+        return exec(cmdarray, envp, dir, redirectError);
     }
 
     public Process exec(String command, String[] envp) throws IOException {

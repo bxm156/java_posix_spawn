@@ -13,7 +13,7 @@ extern "C" {
  * Signature: ([Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/FileDescriptor;Ljava/io/FileDescriptor;Ljava/io/FileDescriptor;)I
  */
 JNIEXPORT jint JNICALL Java_net_axiak_runtime_SpawnedProcess_execProcess
-  (JNIEnv *, jobject, jobjectArray, jobjectArray, jstring, jstring, jobject, jobject, jobject);
+  (JNIEnv *, jobject, jobjectArray, jobjectArray, jstring, jstring, jobject, jobject, jobject, jint);
 
 /*
  * Class:     net_axiak_runtime_SpawnedProcess
