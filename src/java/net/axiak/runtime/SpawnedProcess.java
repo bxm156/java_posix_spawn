@@ -146,7 +146,11 @@ public class SpawnedProcess extends Process {
                         }
                         stdin = new BufferedOutputStream(new FileOutputStream(stdin_fd));
                         stdout = new BufferedInputStream(new FileInputStream(stdout_fd));
-                        stderr = new FileInputStream(stderr_fd);
+                        if(!redirectError) {
+                        	stderr = new FileInputStream(stderr_fd);
+                        } else {
+                        	stderr = NullInputStream.INSTANCE;
+                        }
                        
                         Thread t = new Thread("process reaper") {
                             public void run() {

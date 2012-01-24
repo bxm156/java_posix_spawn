@@ -29,7 +29,7 @@
   </target>
 
   <target name="compile-spawn" depends="prepare">
-    <javac srcdir="${app.path}/src/java/net" destdir="${build.path}/" debug="${debug}" />
+    <javac includeantruntime="false" srcdir="${app.path}/src/java/net" destdir="${build.path}/" debug="${debug}" />
   </target>
 
   <target name="compile-shared" depends="prepare">
