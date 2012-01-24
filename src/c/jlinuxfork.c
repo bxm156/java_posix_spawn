@@ -91,8 +91,6 @@ JNIEXPORT jint JNICALL Java_net_axiak_runtime_SpawnedProcess_execProcess
 
     /* Support redirecting stderr to stdout */
     if(redirect_error == 1) {
-    	closeSafely(pipe_fd3[0]);
-    	closeSafely(pipe_fd3[1]);
     	fds[2] = pipe_fd2[1];
     }
 

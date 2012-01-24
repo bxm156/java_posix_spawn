@@ -149,6 +149,9 @@ public class SpawnedProcess extends Process {
                         if(!redirectError) {
                         	stderr = new FileInputStream(stderr_fd);
                         } else {
+                        	try {
+                        		new FileInputStream(stderr_fd).close();
+                        	} catch (IOException e) {}
                         	stderr = NullInputStream.INSTANCE;
                         }
                        
