@@ -2,22 +2,18 @@ package com.bryanmarty.processbuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.processing.ProcessingEnvironment;
-
 import net.axiak.runtime.SpawnRuntime;
-import net.axiak.runtime.SpawnedProcess;
 
 public class SpawnProcessBuilder {
 	
 	private boolean redirectErrorStream;
 	private File directory;
 	private LinkedList<String> command;
-	private Map<String, String> enviornment;
+	private Map<String, String> environment;
 	
 	private static final SpawnRuntime RUNTIME = new SpawnRuntime(Runtime.getRuntime());
 
@@ -26,7 +22,7 @@ public class SpawnProcessBuilder {
 			throw new NullPointerException();
 		}
 		this.command = new LinkedList<String>(command);
-		this.enviornment = System.getenv();
+		this.environment = new HashMap<String,String>(System.getenv());
 	}
 	SpawnProcessBuilder(String command) {
 		if(command == null) {
@@ -34,6 +30,7 @@ public class SpawnProcessBuilder {
 		}
 		this.command = new LinkedList<String>();
 		this.command.add(command);
+		this.environment = new HashMap<String,String>(System.getenv());
 	}
 	
 	public List<String> command() {
@@ -57,7 +54,7 @@ public class SpawnProcessBuilder {
 		if(secMan != null) {
 			secMan.checkPermission(new RuntimePermission("getenv.*"));
 		}
-		return this.enviornment;
+		return this.environment;
 	}
 	
 	public boolean redirectErrorStream() {
@@ -96,7 +93,7 @@ public class SpawnProcessBuilder {
 		}
 		
 		String[] commandArray = command.toArray(new String[command.size()]);
-		String[] envp = convertEnvironment(this.enviornment);
+		String[] envp = convertEnvironment(this.environment);
 		return RUNTIME.exec(commandArray, envp, this.directory, this.redirectErrorStream);
 	}
 }
